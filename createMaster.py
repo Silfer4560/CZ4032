@@ -7,7 +7,7 @@ import pandas as pd
 import isodata
 
 
-def createMasterA(handleA, fileList,alen):
+def createMasterA(handleA, fileList, alen):
     print("merging A list")
     # list of all dataframes
     dfList = []
@@ -23,7 +23,7 @@ def createMasterA(handleA, fileList,alen):
     print(combined_csv.columns)
     print("number of rows = " + str(len(combined_csv.index)))
     print("alen = " + str(alen))
-    #write to masterfileA
+    # write to masterfileA
     combined_csv.to_csv(handleA, index=False, encoding='utf-8-sig', chunksize=10000)
     print("combined all to master A")
 
@@ -33,10 +33,10 @@ def show_help():
     print("Usage: createMaster.py [directory path to masterfiles] -i to isolate address for lat long calculation")
 
 
-def createMasterB(handleB, fileList,blen):
+def createMasterB(handleB, fileList, blen):
     print("merging B list")
     combined_csv = pd.concat([pd.read_csv(f) for f in fileList], ignore_index=True)
-    #printout to check correctness
+    # printout to check correctness
     print("COMBINED CSV COLUMNS")
     print(combined_csv.columns)
     print("number of rows = " + str(len(combined_csv.index)))
@@ -47,24 +47,27 @@ def createMasterB(handleB, fileList,blen):
 
 
 def isolate(fileHandle, dataframe):
-    location ={}
-    flat_m =[]
-    flat_t =[]
+    location = []
+    flat_m = []
+    flat_t = []
     count = 0
 
-    for index,row in dataframe.iterrows():
+    for index, row in dataframe.iterrows():
         count += 1
-        if (count % 1000 ==0):
+        if (count % 1000 == 0):
             print("Iterated {} times".format(count))
-        # identify all flat_model in dataset
+        locString = row["block"] + "," + row["street_name"]
+    # identify all flat_model in dataset
         if row["flat_model"] not in flat_m:
             flat_m.append(row["flat_model"])
-        #identify all flat type in dataset
+        # identify all flat type in dataset
         if row["flat_type"] not in flat_t:
             flat_t.append(row["flat_type"])
-        #identify all different locations
-        if row["block"] not in location.keys():
-            location[row["block"]] = row["street_name"]
+        # identify all different locations
+        if locString not in location:
+            location.append(locString)
+
+
     print("extraction complete: printing to file")
     fileHandle.write("#all flat types \n")
     fileHandle.write("FLAT_T =")
@@ -80,7 +83,6 @@ def isolate(fileHandle, dataframe):
     fileHandle.write("\n\n")
     fileHandle.close()
     print("File written")
-
 
 if __name__ == "__main__":
     print ('Number of arguments:', len(sys.argv), 'arguments.')
@@ -108,16 +110,13 @@ if __name__ == "__main__":
             show_help()
             sys.exit(0)
 
-
-        #variables for theoretical rows in table for checking
-        alen=0
-        blen=0
-
+        # variables for theoretical rows in table for checking
+        alen = 0
+        blen = 0
 
         # file handle for two master files
         f1 = open("Master File\masterA.csv", "w")  # no remaining months(all files)
         f2 = open("Master File\masterB.csv", "w")  # remaining months, files without will be excluded
-
 
         # split files accordingly
         masterAList = []
@@ -143,15 +142,15 @@ if __name__ == "__main__":
         createMasterA(f1, masterAList, alen)
         createMasterB(f2, masterBList, blen)
     elif "-i" in sys.argv:
-        #extract data
-        #open master file A
+        # extract data
+        # open master file A
         try:
             masterDf = pd.read_csv('masterA.csv')
         except:
             print("masterA.csv not found")
 
-        f3 = open("isodata.py", "w")
-        isolate(f3,masterDf)
+        f3 = open("constants.py", "w")
+        isolate(f3, masterDf)
 
     elif "-t" in sys.argv:
         print (isodata.FLAT_T)
