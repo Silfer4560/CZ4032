@@ -17,14 +17,18 @@ def find_longlat(addr):
     PARAMS = {'searchVal':addr, 'returnGeom': "Y", 'getAddrDetails': 'Y'} 
 
     # Fetch request from oneMap api with retries
-    session = requests.Session()
-    retry = Retry(connect=5, backoff_factor=1.0)
-    adapter = HTTPAdapter(max_retries=retry)
-    session.mount('http://', adapter)
-    session.mount('https://', adapter)
+    try:
+        session = requests.Session()
+        retry = Retry(connect=5, backoff_factor=1.0)
+        adapter = HTTPAdapter(max_retries=retry)
+        session.mount('http://', adapter)
+        session.mount('https://', adapter)
 
-    r = session.get(url = URL, params = PARAMS)
-    print(r.url)
+        r = session.get(url = URL, params = PARAMS)
+        print(r.url)
+    except Exception as e:
+        print (e)
+        return 8,8
 
     # extracting data in json format 
     data = r.json() 
