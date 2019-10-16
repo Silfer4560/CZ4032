@@ -4,7 +4,7 @@ import time
 import csv
 import glob
 import pandas as pd
-import isodata
+import constants
 
 
 def createMasterA(handleA, fileList, alen):
@@ -87,7 +87,7 @@ def isolate(fileHandle, dataframe):
 if __name__ == "__main__":
     print ('Number of arguments:', len(sys.argv), 'arguments.')
     print ('Argument List:', str(sys.argv))
-    if len(sys.argv) <= 2:
+    if len(sys.argv) < 2:
         show_help()
         sys.exit(0)
     # declare directory
@@ -125,7 +125,7 @@ if __name__ == "__main__":
             print ("reading " + f)
             data = pd.read_csv(f)
             print(data.columns)
-            if (len(data.columns) == 10):
+            if (len(data.columns) == 11):
                 masterBList.append(f)
                 blen = blen + len(data.index)
             masterAList.append(f)
@@ -153,6 +153,6 @@ if __name__ == "__main__":
         isolate(f3, masterDf)
 
     elif "-t" in sys.argv:
-        print (isodata.FLAT_T)
-        print(isodata.FLAT_M)
-        print(isodata.FLAT_LOCATION)
+        print (constants.FLAT_T)
+        print(constants.FLAT_M)
+        print(constants.FLAT_LOCATION)
