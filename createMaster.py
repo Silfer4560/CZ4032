@@ -56,7 +56,7 @@ def isolate(fileHandle, dataframe):
         count += 1
         if (count % 1000 == 0):
             print("Iterated {} times".format(count))
-        locString = row["block"] + "," + row["street_name"]
+        locString = row["block"] + " " + row["street_name"]
     # identify all flat_model in dataset
         if row["flat_model"] not in flat_m:
             flat_m.append(row["flat_model"])
