@@ -39,8 +39,8 @@ def find_longlat(addr):
         print ("No address found")
         return 0,0
     else:
-        latitude = data['results'][0]['LATITUDE']#['location']['lat'] 
-        longitude = data['results'][0]['LONGITUDE']#['location']['lng'] 
+        latitude = data['results'][0]['LATITUDE']
+        longitude = data['results'][0]['LONGITUDE']
 
         # printing the output 
         #print("Latitude:%s\nLongitude:%s\n" %(latitude, longitude))
@@ -87,8 +87,7 @@ def main():
 			# Remove repeated address
             df_1000.drop_duplicates(subset = "blk_street" , keep = 'first', inplace = True)
 			
-            #df_1000["blk_street"].to_csv("blk_street.csv", index=False)			
-            #blk_street_df=pd.DataFrame()
+			# Run multicore function
             df_1000 = parallelize_dataframe(df_1000, write_longlang)
 
             # End of timer
