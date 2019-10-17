@@ -1,4 +1,6 @@
 import sys
+import time
+
 import constants
 import pandas as pd
 
@@ -91,7 +93,57 @@ def dropDupe(dataframes):
     return temp
 
 
+def convertMonths(dataframes):
+    monthlist =[]
+    for x in dataframes:
+        flag = False
+        count = 1
+        x['s_months'] = 0
+        if 'remaining_lease' in x.columns:
+            x['lease_months'] = 0
+            flag = True
+        for index, row in x.iterrows():
+            if (count % 1000 == 0):
+                print("Iterated {} times".format(count))
+            if flag:
+                rString = row['remaining_lease']
+                if "year" in str(rString):
+                    #formatted as x years y months
+                    myArr = rString.split(" ")
+                    if len(myArr) == 2:
+                        #only years
+                        months = int(myArr[0]) * 12
+                    else:
+                        #both months and years
+                        months = (int(myArr[0]) * 12) + int(myArr[2])
+                else:
+                    #only years
+                    months = int(rString) * 12
+                x.at[index, 'lease_months'] = months
+            mString = row['month'] #formatted as year-month
+            #MONTH 1 IS 1990-01
+            myArr1 = mString.split('-')
+            mYear = int(myArr1[0])
+            mMonth = int(myArr1[1])
+            var = ((mYear - 1990) *12) + mMonth
+            x.at[index,'s_months'] = var
+        monthlist.append(x)
+    return monthlist
+
+def storyRange(dataframes):
+    temp = []
+    for x in dataframes:
+        x['storyUpper'] = 0
+        for index, row in x.iterrows():
+            myString = row['storey_range']
+            myArr = myString.split(" ")
+            x.at[index, 'storyUpper'] = myArr[2]
+        temp.append(x)
+    return temp
+
+
 if __name__ == "__main__":
+    start = time.time()
     print('Number of arguments:', len(sys.argv), 'arguments.')
     print('Argument List:', str(sys.argv))
     mylist = constants.stuff
@@ -108,7 +160,10 @@ if __name__ == "__main__":
     addModel(dfList, modelList)
     temp = assertCol(dfList)
     temp1 = assertDupe(temp)
-    final = dropDupe(temp1)
+    temp2 = dropDupe(temp1)
+    temp3 = convertMonths(temp2)
+    final = storyRange(temp3)
+    #final should be the final array of dataframes
     f1 = open("Original Data/Master File/masterA.csv", "w")
     f2 = open("Original Data/Master File/masterB.csv", "w")
     final[0].to_csv(f1, index=False, encoding='utf-8-sig')
@@ -122,3 +177,5 @@ if __name__ == "__main__":
     print("Extra headers: ")
     print(len(constants.FLAT_T) + len(constants.FLAT_M))
     print("FILES WRITTEN")
+    end = time.time()
+    print (end-start)
