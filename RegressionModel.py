@@ -3,17 +3,19 @@ import math
 import tensorflow as tf
 import numpy as np
 import pylab as plt
+from tqdm import tqdm
 
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 NUM_FEATURES = 45
 
 learning_rate = 0.001
-epochs = 10
-batch_size = 64
+epochs = 1000
+batch_size = 128
 num_neuron = 20
 seed = 10
 reg_weight = 0.001
+num_sample_data = 100
 np.random.seed(seed)
 
 # initialization routines for bias and weights
@@ -35,7 +37,7 @@ def ffn(x):
         W = init_weights(NUM_FEATURES, num_neuron)
         b = init_bias(num_neuron)
         Z = tf.matmul(x, W) + b
-        H = tf.nn.relu(Z)
+        H = tf.nn.sigmoid(Z)
 
     with tf.name_scope('linear'):
 
@@ -44,7 +46,7 @@ def ffn(x):
         c = init_bias(1)
         y = tf.matmul(H, V) + c # linear
 
-    return y, V, c, W, b, H, Z
+    return y, V, W, c, b
 
 def main():
     #read and divide data into test and train sets 
@@ -56,10 +58,13 @@ def main():
     np.random.shuffle(idx)
     X_data, Y_data = X_data[idx], Y_data[idx]
 
-    X_data = X_data[:2000]
-    Y_data = Y_data[:2000]
+    #X_data = X_data[:2000]
+    #Y_data = Y_data[:2000]
 
-    X_data = (X_data- np.mean(X_data, axis=0))/ np.std(X_data, axis=0)
+    # Only normalise columns 1:3 and 43:end
+    X_data[:,1:3] = (X_data[:,1:3]- np.mean(X_data[:,1:3], axis=0))/ np.std(X_data[:,1:3], axis=0)
+    X_data[:,43:] = (X_data[:,43:]- np.mean(X_data[:,43:], axis=0))/ np.std(X_data[:,43:], axis=0)
+    #X_data = (X_data- np.mean(X_data, axis=0))/ np.std(X_data, axis=0)
     mean = np.mean(Y_data)
     std = np.std(Y_data)
     Y_data = (Y_data - mean)/ std
@@ -77,7 +82,7 @@ def main():
     x = tf.placeholder(tf.float32, [None, NUM_FEATURES])
     d = tf.placeholder(tf.float32, [None, 1])
 
-    y, V, c, W, b, H, Z = ffn(x)
+    y, V, W, c, b = ffn(x)
 
     #Create the gradient descent optimizer with the given learning rate.
     mse = tf.reduce_mean(tf.square(d - y))
@@ -95,8 +100,10 @@ def main():
         test_err = []
         idx = np.arange(trainX.shape[0])
 
+        lowestLoss = None
+
         # LEARN WEIGHTS
-        for i in range(epochs):
+        for i in tqdm(range(epochs)):
             
             # Shuffle at every epoch
             np.random.shuffle(idx)
@@ -104,11 +111,7 @@ def main():
 
 
             for start, end in zip(range(0, len(trainX), batch_size), range(batch_size, len(trainX), batch_size)):
-                t, W_, b_, Z_ = sess.run([train_op, W, b, Z], feed_dict={x: trainX[start:end], d: trainY[start:end]})
-                if i == 5 and start < 1:
-                    print("W", W_)
-                    print("b", b_)
-                    print("Z", Z_)
+                sess.run([train_op], feed_dict={x: trainX[start:end], d: trainY[start:end]})
 
             tr_err = sess.run([loss], feed_dict={x: trainX, d: trainY})
             train_err.append(tr_err[0])
@@ -116,19 +119,60 @@ def main():
             te_err = sess.run([loss], feed_dict={x: testX, d: testY})
             test_err.append(te_err[0])
 
-            if i % 100 == 0:
-                print('iter %d: train error %g test error %g'%(i, train_err[i], test_err[i]))
+            if lowestLoss == None or te_err < lowestLoss:
+                lowestLoss = te_err
+                V_, c_, W_, b_ = sess.run([V, c, W, b]) #store weights at best epoch
+                bestEpoch = i
+
+            #if i % 10 == 0:
+            #    print('iter %d: train error %g test error %g'%(i, train_err[i], test_err[i]))
+        
+        print("Best current epoch = ", bestEpoch)
+        # load weights from selected epoch
+        V.load(V_, sess)
+        W.load(W_, sess)
+        b.load(b_, sess)
+        c.load(c_, sess)
+
+        # Shuffle test samples and sample 100 of them
+        idxtest = np.arange(testX.shape[0])
+        np.random.shuffle(idxtest)
+        testX, testY = testX[idxtest], testY[idxtest]
+        sub_testX = testX[:num_sample_data]
+        sub_testY = testY[:num_sample_data]
+
+        # Sort the samples for visual aesthetic sake
+        idxsort = np.argsort([i[0] for i in sub_testY])
+        sub_testX, sub_testY = sub_testX[idxsort], sub_testY[idxsort]
+        y_ = sess.run([y], feed_dict={x: sub_testX})
+        sub_testY = unnormalise(sub_testY, mean, std)
+        y_ = unnormalise(np.array(y_), mean, std)
 
     # plot learning curves
     f1 = plt.figure(1)
-    print(train_err)
-    print(test_err)
+    #print(train_err)
+    #print(test_err)
     plt.plot(range(epochs), train_err, label = 'train error')
     plt.plot(range(epochs), test_err, label = 'test error')
     plt.xlabel(str(epochs) + ' iterations')
     plt.ylabel('Mean Square Error')
-    plt.title('Training errors against Epochs - RFE')
-    #plt.ylim(0,0.015)
+    plt.title('Mean square errors against Epochs')
+    plt.ylim(0,0.8)
+    plt.legend()
+
+    f2 = plt.figure(2)
+
+    y1 = [i[0] for i in y_[0]]
+    d1 = [i[0] for i in sub_testY]
+
+    #print(y1)
+    #print(d1)
+
+    plt.scatter(range(num_sample_data), y1, label = "Predicted Values")
+    plt.scatter(range(num_sample_data), d1, label = "Actual values")
+    plt.title('Scatterplot of Predicted vs Target values')
+    plt.xlabel('50 random data samples, sorted')
+    plt.ylabel('Housing Prices')
     plt.legend()
 
     plt.show()
