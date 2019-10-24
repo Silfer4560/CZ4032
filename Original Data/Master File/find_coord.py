@@ -7,6 +7,28 @@ import numpy as np
 import time
 from multiprocessing import  Pool
 import sys
+import json
+
+import googlemaps
+from datetime import datetime
+
+gmaps = googlemaps.Client(key='AIzaSyBoEiWBbGP-k-1JyODIHbkfY5aUnafEq5w')
+
+def find_longlang_google(addr):
+
+
+    geocode_result = gmaps.geocode(addr)
+    if not geocode_result:
+        print (addr + ": Cannot find coord")
+        return 0,0
+    data = json.dumps(geocode_result)
+    latitude = geocode_result[0]["geometry"]["location"]["lat"]
+    longitude = geocode_result[0]["geometry"]["location"]["lng"]
+
+    print (addr + ": " + str(latitude) + "," + str(longitude))
+
+
+    return latitude,longitude
 
 def find_longlat(addr):
     # api-endpoint 
@@ -48,7 +70,7 @@ def find_longlat(addr):
         return latitude,longitude
 
 def write_longlang(df):
-    df["latitude"], df["longitude"] = zip(*df["blk_street"].apply(find_longlat))
+    df["latitude"], df["longitude"] = zip(*df["blk_street"].apply(find_longlang_google))
     return df
 
 def parallelize_dataframe(df, func, n_cores=8):
@@ -75,7 +97,7 @@ def main():
             df = pd.read_csv(sys.argv[1])
 
             #append blk and street name into blk_street
-            #df['blk_street'] = df.block.astype(str).str.cat(df.street_name.astype(str), sep=' ')
+            df['blk_street'] = df.block.astype(str).str.cat(df.street_name.astype(str), sep=' ')
 
             # Make a copy of the original dataframe
             df_1000=df.copy()
@@ -85,7 +107,7 @@ def main():
             start = time.time()
 			
 			# Remove repeated address
-            #df_1000.drop_duplicates(subset = "blk_street" , keep = 'first', inplace = True)
+            df_1000.drop_duplicates(subset = "blk_street" , keep = 'first', inplace = True)
 			
 			# Run multicore function
             df_1000 = parallelize_dataframe(df_1000, write_longlang)
@@ -94,7 +116,7 @@ def main():
             end = time.time()
 
             # Write dataframe to new csv
-            new_csv_name="new_" + sys.argv[1]
+            new_csv_name="new_new_" + sys.argv[1]
             df_1000.to_csv(new_csv_name, index=False)
 
             print(end - start)
