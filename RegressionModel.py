@@ -11,9 +11,9 @@ NUM_FEATURES = 45
 
 learning_rate = 0.001
 epochs = 1000
-batch_size = 128
+batch_size = 64
 num_neuron = 20
-seed = 10
+seed = 15
 reg_weight = 0.001
 num_sample_data = 100
 np.random.seed(seed)
@@ -37,7 +37,7 @@ def ffn(x):
         W = init_weights(NUM_FEATURES, num_neuron)
         b = init_bias(num_neuron)
         Z = tf.matmul(x, W) + b
-        H = tf.nn.sigmoid(Z)
+        H = tf.nn.relu(Z)
 
     with tf.name_scope('linear'):
 
@@ -58,13 +58,18 @@ def main():
     np.random.shuffle(idx)
     X_data, Y_data = X_data[idx], Y_data[idx]
 
-    #X_data = X_data[:2000]
-    #Y_data = Y_data[:2000]
+    X_data = X_data[:5000]
+    Y_data = Y_data[:5000]
 
     # Only normalise columns 1:3 and 43:end
     X_data[:,1:3] = (X_data[:,1:3]- np.mean(X_data[:,1:3], axis=0))/ np.std(X_data[:,1:3], axis=0)
     X_data[:,43:] = (X_data[:,43:]- np.mean(X_data[:,43:], axis=0))/ np.std(X_data[:,43:], axis=0)
     #X_data = (X_data- np.mean(X_data, axis=0))/ np.std(X_data, axis=0)
+
+    #X_data = np.hstack((X_data[:,1:9] + X_data[:,43:]))
+
+    #X_data = np.delete(X_data, slice(9,43), 1)
+
     mean = np.mean(Y_data)
     std = np.std(Y_data)
     Y_data = (Y_data - mean)/ std
@@ -90,7 +95,8 @@ def main():
     regularisation = tf.nn.l2_loss(V) + tf.nn.l2_loss(W)
     loss = mse + reg_weight * regularisation
 
-    optimizer = tf.train.GradientDescentOptimizer(learning_rate)
+    #optimizer = tf.train.GradientDescentOptimizer(learning_rate)
+    optimizer = tf.train.AdagradOptimizer(learning_rate)
     train_op = optimizer.minimize(loss)
         
     with tf.Session() as sess:
@@ -157,7 +163,7 @@ def main():
     plt.xlabel(str(epochs) + ' iterations')
     plt.ylabel('Mean Square Error')
     plt.title('Mean square errors against Epochs')
-    plt.ylim(0,0.8)
+    plt.ylim(0,0.6)
     plt.legend()
 
     f2 = plt.figure(2)
