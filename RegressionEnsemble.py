@@ -1,11 +1,11 @@
 import numpy as np
-from sklearn import neighbors, datasets
+from sklearn.ensemble import GradientBoostingRegressor
 import matplotlib.pyplot as plt
 import math
 from tqdm import tqdm
 
 num_sample_data = 100
-models = [1,3,5,7,9,11,13]
+models = [0]
 
 def unnormalise(data, mean, std):
     return data * std + mean
@@ -32,8 +32,8 @@ mean = np.mean(Y_data)
 std = np.std(Y_data)
 Y_data = (Y_data - mean)/ std
 
-X_data = X_data[:10000]
-Y_data = Y_data[:10000]
+X_data = X_data[:100000]
+Y_data = Y_data[:100000]
 
 #split into train and test
 cutoff = math.floor(0.7 * len(X_data))
@@ -64,34 +64,34 @@ for i in tqdm(models):
     # Create model
 
     #print("Creating model")
-    knn1=neighbors.KNeighborsRegressor(i)
+    gbr=GradientBoostingRegressor(n_estimators=100, learning_rate=0.1,max_depth=1, random_state=0, loss='ls')
     trainX = trainX.astype('float')
     trainY = trainY.astype('float')
-    knn1.fit(trainX, trainY)
+    gbr.fit(trainX, trainY)
 
     #print("Model fitted")
 
     # Predict
     
-    testYpredict = knn1.predict(testX)
+    testYpredict = gbr.predict(testX)
     loss.append(calculateloss(testY, testYpredict))
 
-    predictY = knn1.predict(sub_testX)
+    predictY = gbr.predict(sub_testX)
     predictY = unnormalise(np.array(predictY), mean, std)
     predictions.append(predictY)
     
 print(loss)
-f1 = plt.figure(0)
-plt.plot(models, loss, label = "MSE")
-plt.title('Mean Square Errors of predictions vs K neighbours')
-plt.xlabel('Depth of tree')
-plt.ylabel('Loss')
-plt.legend()
+# f1 = plt.figure(0)
+# plt.plot(models, loss, label = "MSE")
+# plt.title('Mean Square Errors of predictions vs K neighbours')
+# plt.xlabel('Depth of tree')
+# plt.ylabel('Loss')
+# plt.legend()
 
 
 for prediction, depth in zip(predictions, models):
     f1 = plt.figure(depth)
-    plt.scatter(range(num_sample_data), prediction, label = "depth of " + str(depth))
+    plt.scatter(range(num_sample_data), prediction, label = "Gradient Boosting Regressor")
     plt.scatter(range(num_sample_data), sub_testY, label = "Actual values")
     plt.title('Scatterplot of Predicted vs Target values')
     plt.xlabel('100 random data samples, sorted')
