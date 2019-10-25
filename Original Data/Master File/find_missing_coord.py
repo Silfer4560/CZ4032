@@ -4,7 +4,7 @@ import json
 import pandas as pd
 import numpy as np
 
-gmaps = googlemaps.Client(key='AIzaSyBoEiWBbGP-k-1JyODIHbkfY5aUnafEq5w')
+gmaps = googlemaps.Client(key='')
 
 
 

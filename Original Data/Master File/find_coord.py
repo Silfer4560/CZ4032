@@ -12,7 +12,7 @@ import json
 import googlemaps
 from datetime import datetime
 
-gmaps = googlemaps.Client(key='AIzaSyBoEiWBbGP-k-1JyODIHbkfY5aUnafEq5w')
+gmaps = googlemaps.Client(key='')
 
 def find_longlang_google(addr):
 
