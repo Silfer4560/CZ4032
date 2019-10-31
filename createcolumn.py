@@ -142,6 +142,15 @@ def storyRange(dataframes):
     return temp
 
 
+def map_coords(dataframes):
+    temp = []
+    latlong = pd.read_csv("Original Data\\Master File\\coord_mapping.csv")
+    for x in dataframes:
+        x['blk_street'] = x['block'] + ' ' + x['street_name']
+        master = pd.merge(x, latlong, left_on='blk_street', right_on='blk_street', how='left')
+        temp.append(master)
+    return temp
+
 if __name__ == "__main__":
     start = time.time()
     print('Number of arguments:', len(sys.argv), 'arguments.')
@@ -162,10 +171,11 @@ if __name__ == "__main__":
     temp1 = assertDupe(temp)
     temp2 = dropDupe(temp1)
     temp3 = convertMonths(temp2)
-    final = storyRange(temp3)
+    temp4 = storyRange(temp3)
+    final = map_coords(temp4)
     #final should be the final array of dataframes
-    f1 = open("Original Data/Master File/masterA.csv", "w")
-    f2 = open("Original Data/Master File/masterB.csv", "w")
+    f1 = open("Original Data/Master File/masterA_nd.csv", "w")
+    f2 = open("Original Data/Master File/masterB_nd.csv", "w")
     final[0].to_csv(f1, index=False, encoding='utf-8-sig')
     final[1].to_csv(f2, index=False, encoding='utf-8-sig')
     f1.close()
