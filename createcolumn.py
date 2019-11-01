@@ -65,6 +65,8 @@ def assertDupe(dataframes):
                 x.at[index, 'IMPROVED'] = 1
             if (row["Maisonette"] == 1) or (row["MAISONETTE"] == 1):
                 x.at[index, "MAISONETTE"] = 1
+            if (row["Improved-Maisonette"] == 1) or (row["IMPROVED-MAISONETTE"] == 1):
+                x.at[index, "IMPROVED-MAISONETTE"] = 1
             if (row["MODEL A"] == 1) or (row["Model A"] == 1):
                 x.at[index, "MODEL A"] = 1
             if (row["MULTI GENERATION"] == 1) or (row["MULTI-GENERATION"] == 1) or (row["Multi Generation"] == 1):
@@ -88,7 +90,7 @@ def assertDupe(dataframes):
 def dropDupe(dataframes):
     temp = []
     for x in dataframes:
-        data = x.drop(["2 ROOM","2-room","Apartment","Model A-Maisonette","Improved","Maisonette","Model A","MULTI-GENERATION","Multi Generation","New Generation","Premium Apartment","Simplified","Standard","Terrace"],axis=1)
+        data = x.drop(["2 ROOM","2-room","Apartment","Model A-Maisonette","Improved-Maisonette","Improved","Maisonette","Model A","MULTI-GENERATION","Multi Generation","New Generation","Premium Apartment","Simplified","Standard","Terrace"],axis=1)
         temp.append(data)
     return temp
 
