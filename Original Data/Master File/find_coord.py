@@ -17,7 +17,7 @@ gmaps = googlemaps.Client(key='')
 def find_longlang_google(addr):
 
 
-    geocode_result = gmaps.geocode(addr)
+    geocode_result = gmaps.geocode(addr + ', Singapore')
     if not geocode_result:
         print (addr + ": Cannot find coord")
         return 0,0
