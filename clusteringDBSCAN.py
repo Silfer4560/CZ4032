@@ -63,7 +63,7 @@ def cluster_dbscan(data,unscaled_data,title):
 
 
 # Get the dataset to be used for clustering
-housing_data = np.genfromtxt("Original Data/Master File/masterA.csv",delimiter=",")
+housing_data = np.genfromtxt("Original Data/Master File/kmeansA.csv",delimiter=",")
 
 # #shuffle data
 idx = np.arange(housing_data.shape[0])
@@ -71,13 +71,12 @@ np.random.shuffle(idx)
 housing_data = housing_data[idx]
 
 # first column is nan so we drop it
-square_area = housing_data[1:10000,6]
-resale_price = housing_data[1:10000,9]
-remaining_lease = housing_data[1:10000,8]
-remaining_lease = 2019-remaining_lease
+square_area = housing_data[1:10000,0]
+resale_price = housing_data[1:10000,2]
+num_months = housing_data[1:10000,-2]
 
 # DBScan clustering
 area_price,unscaled_area_price = create_data(square_area,resale_price)
 cluster_dbscan(area_price,unscaled_area_price,"Floor area against price")
-lease_price,unscaled_lease_price = create_data(remaining_lease,resale_price)
-cluster_dbscan(lease_price,unscaled_lease_price,"Remaining lease against price")
+months_price,unscaled_months_price = create_data(num_months,resale_price)
+cluster_dbscan(months_price,unscaled_months_price,"Months against price")
