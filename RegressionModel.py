@@ -7,9 +7,9 @@ from tqdm import tqdm
 
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
-NUM_FEATURES = 45
+NUM_FEATURES = 31
 
-learning_rate = 0.001
+learning_rate = 0.01
 epochs = 1000
 batch_size = 64
 num_neuron = 20
@@ -51,20 +51,18 @@ def ffn(x):
 def main():
     #read and divide data into test and train sets 
     admit_data = np.genfromtxt('cleanRegressionData.csv', delimiter= ',')
-    X_data, Y_data = admit_data[1:,1:46], admit_data[1:,-1]
+    X_data, Y_data = admit_data[1:,1:32], admit_data[1:,-1]
     Y_data = Y_data.reshape(Y_data.shape[0], 1)
 
     idx = np.arange(X_data.shape[0])
     np.random.shuffle(idx)
     X_data, Y_data = X_data[idx], Y_data[idx]
 
-    X_data = X_data[:5000]
-    Y_data = Y_data[:5000]
+    #X_data = X_data[:5000]
+    #Y_data = Y_data[:5000]
 
-    # Only normalise columns 1:3 and 43:end
-    X_data[:,1:3] = (X_data[:,1:3]- np.mean(X_data[:,1:3], axis=0))/ np.std(X_data[:,1:3], axis=0)
-    X_data[:,43:] = (X_data[:,43:]- np.mean(X_data[:,43:], axis=0))/ np.std(X_data[:,43:], axis=0)
-    #X_data = (X_data- np.mean(X_data, axis=0))/ np.std(X_data, axis=0)
+    # normalise to 0-1
+    X_data = (X_data- np.min(X_data, axis=0))/ np.max(X_data, axis=0)
 
     #X_data = np.hstack((X_data[:,1:9] + X_data[:,43:]))
 
@@ -133,7 +131,7 @@ def main():
             #if i % 10 == 0:
             #    print('iter %d: train error %g test error %g'%(i, train_err[i], test_err[i]))
         
-        print("Best current epoch = ", bestEpoch)
+        print("Best current epoch = ", bestEpoch, " lowest loss = ", lowestLoss)
         # load weights from selected epoch
         V.load(V_, sess)
         W.load(W_, sess)
@@ -163,7 +161,7 @@ def main():
     plt.xlabel(str(epochs) + ' iterations')
     plt.ylabel('Mean Square Error')
     plt.title('Mean square errors against Epochs')
-    plt.ylim(0,0.6)
+    #plt.ylim(0,0.5)
     plt.legend()
 
     f2 = plt.figure(2)

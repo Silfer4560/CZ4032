@@ -4,20 +4,7 @@ import math
 
 EPOCH_TIME = '1990-01'
 
-masterWithoutLatLong = pd.read_csv("Original Data\\Master File\\Master File\\masterA.csv")
-latlong = pd.read_csv("Original Data\\Master File\\Coordinates_mapping.csv")
-
-# merge table with latlong table
-masterWithoutLatLong['blk_street'] = masterWithoutLatLong['block'] + ' ' + masterWithoutLatLong['street_name']
-master = pd.merge(masterWithoutLatLong, latlong, left_on='blk_street', right_on='blk_street', how='left')
-
-# convert storey into a integer
-master['storey'] = master['storey_range'].str.split(' ').str[0]
-
-# convert month
-formattedMonth = pd.to_datetime(master['month'], format='%Y-%m')
-epochMonth = pd.to_datetime(EPOCH_TIME, format='%Y-%m')
-master['monthFromStart'] = round((formattedMonth - epochMonth)/np.timedelta64(1, 'M'))
+master = pd.read_csv("masterA_nd.csv")
 
 resale_price = master.pop('resale_price')
 master['resale_price'] = resale_price
@@ -25,4 +12,7 @@ master['resale_price'] = resale_price
 # drop all columns that are not integer
 masterdropped = master.drop(columns=['month', 'town', 'storey_range', 'flat_type', 'block', 'street_name', 'flat_model', 'blk_street']) 
 
-masterdropped.to_csv("cleanRegressionData.csv")
+# Realign 2 room to be in the right column
+realigned = masterdropped[['floor_area_sqm', 'lease_commence_date', '1 ROOM', '2-ROOM', '3 ROOM', '4 ROOM', '5 ROOM', 'EXECUTIVE', 'MULTI GENERATION', 'IMPROVED', 'NEW GENERATION', 'MODEL A', 'STANDARD', 'SIMPLIFIED', 'MODEL A-MAISONETTE', 'APARTMENT', 'MAISONETTE', 'TERRACE', 'IMPROVED-MAISONETTE', 'PREMIUM APARTMENT', 'Adjoined flat', 'Premium Maisonette', 'Model A2', 'Type S1', 'Type S2', 'DBSS', 'Premium Apartment Loft', 's_months', 'storyUpper', 'latitude', 'longitude', 'resale_price']]
+
+realigned.to_csv("cleanRegressionData.csv")
