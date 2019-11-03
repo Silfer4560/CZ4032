@@ -100,24 +100,23 @@ def main():
             df['blk_street'] = df.block.astype(str).str.cat(df.street_name.astype(str), sep=' ')
 
             # Make a copy of the original dataframe
-            df_1000=df.copy()
-            #df_1000=df.tail(123)
+            df_copy = df.filter(['blk_street'], axis=1)
 
             # Timer for benchmarking
             start = time.time()
 			
 			# Remove repeated address
-            df_1000.drop_duplicates(subset = "blk_street" , keep = 'first', inplace = True)
+            df_copy.drop_duplicates(subset = "blk_street" , keep = 'first', inplace = True)
 			
 			# Run multicore function
-            df_1000 = parallelize_dataframe(df_1000, write_longlang)
+            df_copy = parallelize_dataframe(df_copy, write_longlang)
 
             # End of timer
             end = time.time()
 
             # Write dataframe to new csv
-            new_csv_name="new_new_" + sys.argv[1]
-            df_1000.to_csv(new_csv_name, index=False)
+            new_csv_name="coord_mapping.csv"
+            df_copy.to_csv(new_csv_name, index=False)
 
             print(end - start)
 
