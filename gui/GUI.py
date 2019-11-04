@@ -9,13 +9,12 @@ import json
 data = ['PyQt5','Is','Awesome']
 
 #all flat types 
-flat_Type_List =['1 ROOM', '3 ROOM', '4 ROOM', '5 ROOM', '2 ROOM', 'EXECUTIVE', 'MULTI GENERATION']
-flat_Type_Binary = [0,0,0,0,0,0,0]
+flat_Type_List =['1 ROOM','2 ROOM', '3 ROOM', '4 ROOM', '5 ROOM',  'EXECUTIVE', 'MULTI GENERATION']
+flat_Type_Binary = [0 for i in range(len(flat_Type_List))]
 
 #all flat models 
-flat_Model_List =['MULTI-GENERATION','IMPROVED', 'NEW GENERATION', 'MODEL A', 'STANDARD', 'SIMPLIFIED', 'MODEL A-MAISONETTE', 'APARTMENT', 'MAISONETTE', 'TERRACE', '2-ROOM', 'IMPROVED-MAISONETTE', 'PREMIUM APARTMENT', 'Improved', 'New Generation', 'Model A', 'Standard', 'Apartment', 'Simplified', 'Model A-Maisonette', 'Maisonette', 'Multi Generation', 'Adjoined flat', 'Premium Apartment', 'Terrace', 'Improved-Maisonette', 'Premium Maisonette', '2-room', 'Model A2', 'Type S1', 'Type S2', 'DBSS', 'Premium Apartment Loft']
-flat_Model_Binary = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-
+flat_Model_List = ["IMPROVED","NEW GENERATION","MODEL A","STANDARD","SIMPLIFIED","MODEL A-MAISONETTE","APARTMENT","MAISONETTE","TERRACE","IMPROVED-MAISONETTE","PREMIUM APARTMENT","Adjoined flat","Premium Maisonette","Model A2","Type S1","Type S2","DBSS","Premium Apartment Loft"]
+flat_Model_Binary = [0 for i in range(len(flat_Model_List))]
  
 class mywindow(QtWidgets.QMainWindow):
  
@@ -42,14 +41,14 @@ class mywindow(QtWidgets.QMainWindow):
             for i, word in enumerate(flat_Type_List):
                 if word == flatType:
                     flat_Type_Binary_copy[i] = 1
-                    print (flat_Type_Binary_copy)
-                    print (word)
+                    #print (flat_Type_Binary_copy)
+                    #print (word)
 
             for i, word in enumerate(flat_Model_List):
                 if word == flatModel:
                     flat_Model_Binary_copy[i] = 1
-                    print (flat_Model_Binary_copy)
-                    print (word)
+                    #print (flat_Model_Binary_copy)
+                    #print (word)
 
             print (addr)
             (lat,lng) = self.find_longlang(addr)
@@ -58,14 +57,16 @@ class mywindow(QtWidgets.QMainWindow):
             final_array = [floorArea,lease]
             final_array.extend(flat_Type_Binary_copy)
             final_array.extend(flat_Model_Binary_copy)
-            #final_array.append(addr)
+            final_array.append(months)
+            final_array.append(storeyRange)
             final_array.append(lat)
             final_array.append(lng)
-            final_array.append(storeyRange)
-            final_array.append(months)
 
-            prediction = ReadModel.predict(final_array[:45])
-            prediction_str = "SGD " + format(prediction[0], '.2f')
+
+
+            prediction = ReadModel.predict(final_array)
+            #prediction_str = "SGD " + format(prediction[0], '.2f')
+            prediction_str = "SGD " + str(prediction[0])
             self.ui.prediction_Label.setText(prediction_str)
             print (prediction)
             print (final_array)
@@ -109,7 +110,7 @@ class mywindow(QtWidgets.QMainWindow):
 
  
 app = QtWidgets.QApplication([])
-app.setStyle('Fusion')
+#app.setStyle('Fusion')
 win = mywindow()
 win.show()
 sys.exit(app.exec())
