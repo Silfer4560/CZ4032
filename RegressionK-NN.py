@@ -5,7 +5,7 @@ import math
 from tqdm import tqdm
 
 num_sample_data = 100
-models = [1,3,5,7,9,11,13]
+models = [9,13, 17,21,25,31,35,39,41,45,49, 101, 151, 201, 501, 801, 1001, 2001, 3001, 4001, 5001]
 
 def unnormalise(data, mean, std):
     return data * std + mean
@@ -20,7 +20,7 @@ admit_data = np.genfromtxt('cleanRegressionData.csv', delimiter= ',')
 
 print("Data imported")
 
-X_data, Y_data = admit_data[1:,1:46], admit_data[1:,-1]
+X_data, Y_data = admit_data[1:,1:32], admit_data[1:,-1]
 Y_data = Y_data.reshape(Y_data.shape[0], 1)
 
 idx = np.arange(X_data.shape[0])

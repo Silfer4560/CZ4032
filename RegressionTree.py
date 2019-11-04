@@ -5,7 +5,7 @@ import math
 from tqdm import tqdm
 
 num_sample_data = 100
-models = [8,9,10,11,12,13,14,15,16,17]
+models = [14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30]
 
 def unnormalise(data, mean, std):
     return data * std + mean
@@ -20,17 +20,18 @@ admit_data = np.genfromtxt('cleanRegressionData.csv', delimiter= ',')
 
 print("Data imported")
 
-X_data, Y_data = admit_data[1:,1:46], admit_data[1:,-1]
+X_data, Y_data = admit_data[1:,1:32], admit_data[1:,-1]
+print(len(X_data[0]))
 Y_data = Y_data.reshape(Y_data.shape[0], 1)
 
 idx = np.arange(X_data.shape[0])
 np.random.shuffle(idx)
 X_data, Y_data = X_data[idx], Y_data[idx]
 
-X_data = (X_data- np.mean(X_data, axis=0))/ np.std(X_data, axis=0)
-mean = np.mean(Y_data)
-std = np.std(Y_data)
-Y_data = (Y_data - mean)/ std
+#X_data = (X_data- np.mean(X_data, axis=0))/ np.std(X_data, axis=0)
+#mean = np.mean(Y_data)
+#std = np.std(Y_data)
+#Y_data = (Y_data - mean)/ std
 
 #split into train and test
 cutoff = math.floor(0.7 * len(X_data))
@@ -52,7 +53,7 @@ sub_testY = testY[:num_sample_data]
 idxsort = np.argsort([i[0] for i in sub_testY])
 sub_testX, sub_testY = sub_testX[idxsort], sub_testY[idxsort]
 sub_testY2 = [i[0] for i in sub_testY]
-sub_testY = unnormalise(np.array(sub_testY2), mean, std)
+#sub_testY = unnormalise(np.array(sub_testY2), mean, std)
 
 predictions = []
 loss = []
@@ -72,7 +73,7 @@ for i in tqdm(models):
     loss.append(calculateloss(testY, testYpredict))
 
     predictY = regr1.predict(sub_testX)
-    predictY = unnormalise(np.array(predictY), mean, std)
+    #predictY = unnormalise(np.array(predictY), mean, std)
     predictions.append(predictY)
     
 print(loss)

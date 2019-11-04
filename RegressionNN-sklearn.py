@@ -20,7 +20,7 @@ admit_data = np.genfromtxt('cleanRegressionData.csv', delimiter= ',')
 
 print("Data imported")
 
-X_data, Y_data = admit_data[1:,1:46], admit_data[1:,-1]
+X_data, Y_data = admit_data[1:,1:32], admit_data[1:,-1]
 Y_data = Y_data.reshape(Y_data.shape[0], 1)
 
 idx = np.arange(X_data.shape[0])
@@ -32,8 +32,8 @@ mean = np.mean(Y_data)
 std = np.std(Y_data)
 Y_data = (Y_data - mean)/ std
 
-X_data = X_data[:100000]
-Y_data = Y_data[:100000]
+#X_data = X_data[:100000]
+#Y_data = Y_data[:100000]
 
 #split into train and test
 cutoff = math.floor(0.7 * len(X_data))
