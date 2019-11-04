@@ -1,6 +1,7 @@
 from sklearn.cluster import DBSCAN
 import numpy as np
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 def scale(data):
     scaled_data = (data- np.mean(data, axis=0))/ np.std(data, axis=0)
     return scaled_data
@@ -63,7 +64,7 @@ def cluster_dbscan(data,unscaled_data,title):
 
 
 # Get the dataset to be used for clustering
-housing_data = np.genfromtxt("Original Data/Master File/kmeansA.csv",delimiter=",")
+housing_data = np.genfromtxt("Original Data/Master File/cleanRegressionData.csv",delimiter=",")
 
 # #shuffle data
 idx = np.arange(housing_data.shape[0])
@@ -71,12 +72,38 @@ np.random.shuffle(idx)
 housing_data = housing_data[idx]
 
 # first column is nan so we drop it
-square_area = housing_data[1:10000,0]
-resale_price = housing_data[1:10000,2]
-num_months = housing_data[1:10000,-2]
+square_area = housing_data[1:10000,1]
+resale_price = housing_data[1:10000,-1]
+num_months = housing_data[1:10000,-5]
+
 
 # DBScan clustering
 area_price,unscaled_area_price = create_data(square_area,resale_price)
 cluster_dbscan(area_price,unscaled_area_price,"Floor area against price")
 months_price,unscaled_months_price = create_data(num_months,resale_price)
 cluster_dbscan(months_price,unscaled_months_price,"Months against price")
+
+#lat long 
+lat_long_price = housing_data[1:10000,-3:]
+scaled_lat_long_price = scale(lat_long_price)
+# compute dbscan
+db = DBSCAN(eps=0.1, min_samples=50).fit(scaled_lat_long_price)
+
+# Extract a mask of core cluster members
+core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
+core_samples_mask[db.core_sample_indices_] = True
+
+# Extract labels (-1 is used for outliers)
+labels = db.labels_
+n_clusters = len(set(labels)) - (1 if -1 in labels else 0)
+unique_labels = set(labels)
+# Plot up the results!
+fig = plt.figure()
+ax = fig.add_subplot(projection='3d')
+
+ax.scatter(lat_long_price[:,1], lat_long_price[:,0], lat_long_price[:,2])
+
+ax.set_xlabel('Long')
+ax.set_ylabel('Lat')
+ax.set_zlabel('Price')
+plt.savefig("latlong vs price")
