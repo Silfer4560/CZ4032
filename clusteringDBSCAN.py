@@ -2,6 +2,10 @@ from sklearn.cluster import DBSCAN
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+# import pandas as pd
+# import itertools as it
+# from sklearn import preprocessing
+
 def scale(data):
     scaled_data = (data- np.mean(data, axis=0))/ np.std(data, axis=0)
     return scaled_data
@@ -19,7 +23,7 @@ def create_data(col1,col2):
 
 def cluster_dbscan(data,unscaled_data,title):
     # compute dbscan
-    db = DBSCAN(eps=0.1, min_samples=50).fit(data)
+    db = DBSCAN(eps=0.085, min_samples=50).fit(data)
 
     # Extract a mask of core cluster members
     core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
@@ -72,9 +76,9 @@ np.random.shuffle(idx)
 housing_data = housing_data[idx]
 
 # first column is nan so we drop it
-square_area = housing_data[1:10000,1]
-resale_price = housing_data[1:10000,-1]
-num_months = housing_data[1:10000,-5]
+square_area = housing_data[1:20000,1]
+resale_price = housing_data[1:20000,-1]
+num_months = housing_data[1:20000,-5]
 
 
 # DBScan clustering
@@ -84,7 +88,7 @@ months_price,unscaled_months_price = create_data(num_months,resale_price)
 cluster_dbscan(months_price,unscaled_months_price,"Months against price")
 
 #lat long 
-lat_long_price = housing_data[1:10000,-3:]
+lat_long_price = housing_data[1:40000,-3:]
 scaled_lat_long_price = scale(lat_long_price)
 # compute dbscan
 db = DBSCAN(eps=0.1, min_samples=50).fit(scaled_lat_long_price)
