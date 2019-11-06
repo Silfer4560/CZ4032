@@ -88,10 +88,10 @@ months_price,unscaled_months_price = create_data(num_months,resale_price)
 cluster_dbscan(months_price,unscaled_months_price,"Months against price")
 
 #lat long 
-lat_long_price = housing_data[1:40000,-3:]
-scaled_lat_long_price = scale(lat_long_price)
+unscaled_lat_long_price = housing_data[1:10000,-3:]
+lat_long_price = scale(unscaled_lat_long_price)
 # compute dbscan
-db = DBSCAN(eps=0.1, min_samples=50).fit(scaled_lat_long_price)
+db = DBSCAN(eps=0.5, min_samples=50).fit(lat_long_price)
 
 # Extract a mask of core cluster members
 core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
@@ -104,8 +104,15 @@ unique_labels = set(labels)
 # Plot up the results!
 fig = plt.figure()
 ax = fig.add_subplot(projection='3d')
-
-ax.scatter(lat_long_price[:,1], lat_long_price[:,0], lat_long_price[:,2])
+colors = [plt.cm.Spectral(each)
+          for each in np.linspace(0, 1, len(unique_labels))]
+for k, col in zip(unique_labels, colors):
+    if k == -1:
+        # Black used for noise.
+        col = [0, 0, 0, 1]
+    class_member_mask = (labels==k)
+    xy = unscaled_lat_long_price[class_member_mask & ~core_samples_mask]
+    ax.scatter(xy[:, 1], xy[:, 0],xy[:,2])
 
 ax.set_xlabel('Long')
 ax.set_ylabel('Lat')
