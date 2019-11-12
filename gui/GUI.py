@@ -12,8 +12,19 @@ data = ['PyQt5','Is','Awesome']
 flat_Type_List =['1 ROOM','2 ROOM', '3 ROOM', '4 ROOM', '5 ROOM',  'EXECUTIVE', 'MULTI GENERATION']
 flat_Type_Binary = [0 for i in range(len(flat_Type_List))]
 
+month_list = [str(i) for i in range(1,13)]
+year_list = [str(i) for i in range(1990,2026)]
+
+
 #all flat models 
-flat_Model_List = ["IMPROVED","NEW GENERATION","MODEL A","STANDARD","SIMPLIFIED","MODEL A-MAISONETTE","APARTMENT","MAISONETTE","TERRACE","IMPROVED-MAISONETTE","PREMIUM APARTMENT","Adjoined flat","Premium Maisonette","Model A2","Type S1","Type S2","DBSS","Premium Apartment Loft"]
+flat_Model_List = [
+    "IMPROVED","NEW GENERATION","MODEL A",
+    "STANDARD","SIMPLIFIED","MODEL A-MAISONETTE",
+    "APARTMENT","MAISONETTE","TERRACE",
+    "IMPROVED-MAISONETTE","PREMIUM APARTMENT","Adjoined flat",
+    "Premium Maisonette","Model A2","Type S1",
+    "Type S2","DBSS","Premium Apartment Loft"]
+
 flat_Model_Binary = [0 for i in range(len(flat_Model_List))]
  
 class mywindow(QtWidgets.QMainWindow):
@@ -26,6 +37,10 @@ class mywindow(QtWidgets.QMainWindow):
             #Fill comboBox
             self.ui.flat_Type_List.addItems(flat_Type_List)
             self.ui.flat_Model_List.addItems(flat_Model_List)
+            self.ui.dos_month_Box.addItems(month_list)
+            self.ui.dos_month_Box.setCurrentIndex(self.ui.dos_month_Box.findText("11", QtCore.Qt.MatchFixedString))
+            self.ui.dos_year_Box.addItems(year_list)
+            self.ui.dos_year_Box.setCurrentIndex(self.ui.dos_year_Box.findText("2010", QtCore.Qt.MatchFixedString))
             
             #Linking button signals and actions
             self.ui.predictButton.clicked.connect(self.printAll)
@@ -80,7 +95,7 @@ class mywindow(QtWidgets.QMainWindow):
             addr = self.ui.address_Box.text()
             addr = addr + " Singapore"
             floorArea = self.ui.horizontalSlider.value()
-            months = self.ui.months_Box.value()
+            months = (int(self.ui.dos_year_Box.currentText()) - 1990 ) * 12 + int(self.ui.dos_month_Box.currentText())
             return (flatType,flatModel,storeyRange,lease,addr,floorArea,months)
 
         def find_longlang(self, addr):
@@ -110,7 +125,7 @@ class mywindow(QtWidgets.QMainWindow):
 
  
 app = QtWidgets.QApplication([])
-#app.setStyle('Fusion')
+app.setStyle('Fusion')
 win = mywindow()
 win.show()
 sys.exit(app.exec())
