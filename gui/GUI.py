@@ -80,8 +80,8 @@ class mywindow(QtWidgets.QMainWindow):
 
 
             prediction = ReadModel.predict(final_array)
-            #prediction_str = "SGD " + format(prediction[0], '.2f')
-            prediction_str = "SGD " + str(prediction[0])
+            prediction_str = "SGD " + format(prediction[0], '.2f')
+            #prediction_str = "SGD " + str(prediction[0])
             self.ui.prediction_Label.setText(prediction_str)
             print (prediction)
             print (final_array)
